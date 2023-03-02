@@ -1,62 +1,102 @@
 from phply import phpast, phpparse, phplex
 import networkx as nx
+import pprint
+from definition.ast_node import ASTNode
+import matplotlib.pyplot as plt
+from networkx.drawing.nx_agraph import graphviz_layout
+from networkx.drawing.nx_pydot import to_pydot
 
-# Define a function to generate a control flow graph
-def generate_cfg(filename):
+# Parse a PHP file
+def parse_php_file(filename):
     # Parse the PHP file
     with open(filename, 'r') as f:
         code = f.read()
     lexer = phplex.lexer.clone()
     parser = phpparse.make_parser()
     parsed = parser.parse(code, lexer=lexer)
-    # Create a directed graph to represent the CFG
-    cfg = nx.DiGraph()
-    
-    # Traverse the parsed AST and add edges to the CFG
-    add_edges(parsed, cfg) #TODO above is success, but this line and below have errors.
+    # phpast.resolve_magic_constants(parsed)
+    # pprint.pprint(parsed)
+    return parsed
 
-    return cfg
+# Add edges to the CFG
+def construct_cfg(cfg, node, parent=None):
+    global node_lineno
+    # Only add edges for control flow statements
+    cfs = ["If", "ElseIf", "Else", "While", "DoWhile", "For",
+           "Foreach", "ForeachVariable", "Switch", "Case", "Default"]
+    node_type = node.__class__.__name__
+    if node_type in cfs:
+        # Build and add the node to the CFG
+        node_value = node.expr if hasattr(node, 'expr') else None
+        current_node = ASTNode(node_type, node_value=node_value, node_lineno=node.lineno)
+        cfg.add_edge(parent, current_node, label=node_type)
 
-# Define a helper function to add edges to the CFG
-def add_edges(nodes, cfg, parent=None):
-    for node in nodes:
-        if parent is not None:
-            cfg.add_edge(parent, node)
-        if isinstance(node, phpast.If):
-            # Add edges for the if statement's condition and body
-            cfg.add_edge(node, node)
-            add_edges(node.body, node)
-            # Add edges for the else statement's body (if it exists)
-            if node.else_:
-                add_edges(node.else_, node)
-        elif isinstance(node, phpast.While):
-            # Add edges for the while loop's condition and body
-            cfg.add_edge(node, node.test)
-            add_edges(node.body, node)
-        elif isinstance(node, phpast.DoWhile):
-            # Add edges for the do-while loop's body and condition
-            add_edges(node.body, node)
-            cfg.add_edge(node, node.test)
-        elif isinstance(node, phpast.For):
-            # Add edges for the for loop's init, condition, and increment,
-            # as well as its body
-            if node.init:
-                add_edges(node.init, node)
-            if node.test:
-                cfg.add_edge(node, node.test)
-                add_edges(node.test, node)
-            if node.increment:
-                add_edges(node.increment, node)
-            add_edges(node.body, node)
-        elif isinstance(node, phpast.Foreach):
-            # Add edges for the foreach loop's iterable and body
-            cfg.add_edge(node, node.expr)
-            add_edges(node.body, node)
-        elif isinstance(node, phpast.Switch):
-            # Add edges for the switch statement's condition and cases
-            cfg.add_edge(node, node.test)
-            for case in node.cases:
-                add_edges(case, node)
+        # Regular cases as long as the node has a node/nodes attribute
+        if hasattr(node, 'node') and node.node is not None:
+            construct_cfg(cfg, node.node, parent=current_node)
+        if hasattr(node, 'nodes') and node.nodes is not None:
+            for n in node.nodes:
+                construct_cfg(cfg, n, parent=current_node)
+
+        # Special case for If statements
+        if node_type == "If":
+            for ei in node.elseifs:
+                construct_cfg(cfg, ei, parent=current_node)
+            construct_cfg(cfg, node.else_, parent=current_node)
+        for i in node.fields:
+            print(i, '\t', node.__getattribute__(i))
+                    # Special case for For statements
+                    # if node_type == "For":
+                    #     if node.elseifs is not None:
+                    #         for ei in node.elseifs:
+                    #             construct_cfg(cfg, ei, parent=current_node)
+                    #     if node.else_ is not None:
+                    #         construct_cfg(cfg, node.else_, parent=current_node)
+
+                    # # Special case for Foreach statements
+                    # if node_type == "Foreach":
+                    #     if node.elseifs is not None:
+                    #         for ei in node.elseifs:
+                    #             construct_cfg(cfg, ei, parent=current_node)
+                    #     if node.else_ is not None:
+                    #         construct_cfg(cfg, node.else_, parent=current_node)
+    # Special case for Block statements
+    elif node_type == "Block":
+        # If there is a child that is a control flow statement
+        for n in node.nodes:
+            if n.__class__.__name__ in cfs:
+                # The parent of the child is the current node's parent
+                construct_cfg(cfg, n, parent=parent)
+
 
 if __name__ == '__main__':
-    print(generate_cfg("test/test.php"))
+    # Initialize the CFG and add the start node
+    cfg = nx.DiGraph()
+    start_node = ASTNode("Start", node_lineno=0)
+
+    # Parse the PHP file and construct the CFG
+    parsed = parse_php_file('test/foreach.php')
+    for node in parsed:
+        construct_cfg(cfg, node, parent=start_node)
+
+    # Draw the CFG
+    print(cfg)
+    labels = {node: ": ".join([node.node_type, str(node.node_lineno)])
+              for node in cfg.nodes}
+    color_map = {
+        "If": "red",
+        "ElseIf": "orange",
+        "Else": "yellow",
+        "While": "green",
+        "DoWhile": "lime",
+        "For": "blue",
+        "Foreach": "purple",
+        "ForeachVariable": "pink",
+        "Switch": "brown",
+        "Case": "gray",
+        "Default": "black"
+    }
+    pos = nx.shell_layout(cfg)
+    nx.draw(cfg, with_labels=True, labels=labels, node_color=[
+            color_map.get(node.node_type, "blue") for node in cfg.nodes])
+    plt.show()
