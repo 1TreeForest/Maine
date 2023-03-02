@@ -53,7 +53,8 @@ def construct_cfg(cfg, node, parent=None):
         if node_type == "If":
             for ei in node.elseifs:
                 construct_cfg(cfg, ei, parent=current_node)
-            construct_cfg(cfg, node.else_, parent=current_node)
+            if node.else_ is not None:
+                construct_cfg(cfg, node.else_, parent=current_node)
 
     # Special case for Block
     elif node_type == "Block":
@@ -82,12 +83,15 @@ def construct_cfg(cfg, node, parent=None):
         # Build and add the node to the CFG
         current_node = ASTNode(node_type, node_lineno=node.lineno)
         cfg.add_edge(parent, current_node)
-
+        callee_node = None
         # Find the callee node and add an edge to it
         for n in cfg.nodes:
             if n.node_value == node.name:
                 callee_node = n
                 break
+        if callee_node is None:
+            callee_node = ASTNode(
+                 "Not_Exist_" + node.name, node_value=node.name, node_lineno=node.lineno)
         cfg.add_edge(current_node, callee_node)
 
     # Special case for Class
@@ -123,13 +127,18 @@ def construct_cfg(cfg, node, parent=None):
         # Build and add the node to the CFG
         current_node = ASTNode(node_type, node_lineno=node.lineno)
         cfg.add_edge(parent, current_node)
+        callee_node = None
         # Find the callee node and add an edge to it
         for n in cfg.nodes:
             if n.node_value == node.name:
                 callee_node = n
                 break
+        if callee_node is None:
+                callee_node = ASTNode(
+                    "Function_Not_Exist", node_value=node.name, node_lineno=node.lineno)
         cfg.add_edge(current_node, callee_node)
 
+# TODO Special case for File Include
 
 def node_printer(node):
     """
@@ -148,7 +157,7 @@ if __name__ == '__main__':
     start_node = ASTNode("Start", node_lineno=0)
 
     # Parse the PHP file and construct the CFG
-    parsed = parse_php_file('test/class.php')
+    parsed = parse_php_file('test/complex.php')
     print(len(parsed))
     for node in parsed:
         construct_cfg(cfg, node, parent=start_node)
@@ -175,6 +184,7 @@ if __name__ == '__main__':
         "Class": "olive",
         "Method": "teal",
         "MethodCall": "coral",
+        "StaticMethodCall": "gold",
     }
     pos = nx.arf_layout(cfg)
     fig = plt.figure(figsize=(10, 10))
