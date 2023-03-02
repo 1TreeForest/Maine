@@ -14,8 +14,6 @@ def parse_php_file(filename):
     lexer = phplex.lexer.clone()
     parser = phpparse.make_parser()
     parsed = parser.parse(code, lexer=lexer)
-    # phpast.resolve_magic_constants(parsed)
-    # pprint.pprint(parsed)
     return parsed
 
 # Add edges to the CFG
@@ -43,31 +41,46 @@ def construct_cfg(cfg, node, parent=None):
             for ei in node.elseifs:
                 construct_cfg(cfg, ei, parent=current_node)
             construct_cfg(cfg, node.else_, parent=current_node)
-        for i in node.fields:
-            print(i, '\t', node.__getattribute__(i))
-                    # Special case for For statements
-                    # if node_type == "For":
-                    #     if node.elseifs is not None:
-                    #         for ei in node.elseifs:
-                    #             construct_cfg(cfg, ei, parent=current_node)
-                    #     if node.else_ is not None:
-                    #         construct_cfg(cfg, node.else_, parent=current_node)
-
-                    # # Special case for Foreach statements
-                    # if node_type == "Foreach":
-                    #     if node.elseifs is not None:
-                    #         for ei in node.elseifs:
-                    #             construct_cfg(cfg, ei, parent=current_node)
-                    #     if node.else_ is not None:
-                    #         construct_cfg(cfg, node.else_, parent=current_node)
-    # Special case for Block statements
+            
+    # Special case for Block
     elif node_type == "Block":
         # If there is a child that is a control flow statement
         for n in node.nodes:
             if n.__class__.__name__ in cfs:
                 # The parent of the child is the current node's parent
                 construct_cfg(cfg, n, parent=parent)
+                
+    # Special case for Function
+    elif node_type == "Function":
+        # Build and add the node to the CFG
+        node_value = node.name if hasattr(node, 'name') else None
+        current_node = ASTNode(node_type, node_value=node_value, node_lineno=node.lineno)
+        cfg.add_node(current_node)
+        
+        # The function node is the parent of its callee
+        for n in node.nodes:
+            if n.__class__.__name__ in cfs or n.__class__.__name__ == "FunctionCall":
+                # The parent of the child is the current node's parent
+                construct_cfg(cfg, n, parent=current_node)
+                
+    # Special case for FunctionCall
+    elif node_type == "FunctionCall":
+        # Build and add the node to the CFG
+        node_value = node.expr if hasattr(node, 'expr') else None
+        current_node = ASTNode(node_type, node_value=node_value, node_lineno=node.lineno)
+        cfg.add_edge(parent, current_node, label=node_type)
+        
+        # Find the callee node and add an edge to it
+        for n in cfg.nodes:
+            if n.node_value == node.name:
+                callee_node = n 
+                break
+        cfg.add_edge(current_node, callee_node, label=node_type)
 
+def node_printer(node):
+    for i in node.fields:
+            print(i, '\t', node.__getattribute__(i))
+    print('-----------------')
 
 if __name__ == '__main__':
     # Initialize the CFG and add the start node
@@ -75,7 +88,8 @@ if __name__ == '__main__':
     start_node = ASTNode("Start", node_lineno=0)
 
     # Parse the PHP file and construct the CFG
-    parsed = parse_php_file('test/foreach.php')
+    parsed = parse_php_file('test/full.php')
+    print(len(parsed))
     for node in parsed:
         construct_cfg(cfg, node, parent=start_node)
 
@@ -94,9 +108,13 @@ if __name__ == '__main__':
         "ForeachVariable": "pink",
         "Switch": "brown",
         "Case": "gray",
-        "Default": "black"
+        "Default": "black",
+        "Function": "cyan",
+        "FunctionCall": "magenta",
+        "Start": "white"
     }
-    pos = nx.shell_layout(cfg)
-    nx.draw(cfg, with_labels=True, labels=labels, node_color=[
+    pos = nx.arf_layout(cfg)
+    fig = plt.figure(figsize=(10, 10))
+    nx.draw(cfg, pos=pos, with_labels=True, labels=labels, node_color=[
             color_map.get(node.node_type, "blue") for node in cfg.nodes])
     plt.show()
