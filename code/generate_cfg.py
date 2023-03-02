@@ -21,13 +21,14 @@ def parse_php_file(filename):
     return parsed
 
 
-def construct_cfg(cfg, node, parent=None):
+def construct_cfg(cfg, node, parent=None, filename=None):
     """
     Process nodes with different types and add them to the CFG if necessary.
 
     :param cfg: The control flow graph.
     :param node: The current node.
     :param parent: The parent of the current node.
+    :param filename: The filename of the current node.
     """
     node_printer(node)
     cfs = ["If", "ElseIf", "Else", "While", "DoWhile", "For",
@@ -39,7 +40,7 @@ def construct_cfg(cfg, node, parent=None):
         # Build and add the node to the CFG
         node_value = node.expr if hasattr(node, 'expr') else None
         current_node = ASTNode(
-            node_type, node_value=node_value, node_lineno=node.lineno)
+            node_type, node_value=node_value, node_lineno=node.lineno, node_file=filename)
         cfg.add_edge(parent, current_node)
 
         # Regular cases as long as the node has a node/nodes attribute
@@ -69,7 +70,7 @@ def construct_cfg(cfg, node, parent=None):
         # Build and add the node to the CFG
         node_value = node.name if hasattr(node, 'name') else None
         current_node = ASTNode(
-            node_type, node_value=node_value, node_lineno=node.lineno)
+            node_type, node_value=node_value, node_lineno=node.lineno, node_file=filename)
         cfg.add_node(current_node)
 
         # The function node is the parent of its callee
@@ -81,7 +82,7 @@ def construct_cfg(cfg, node, parent=None):
     # Special case for FunctionCall
     elif node_type == "FunctionCall":
         # Build and add the node to the CFG
-        current_node = ASTNode(node_type, node_lineno=node.lineno)
+        current_node = ASTNode(node_type, node_lineno=node.lineno, node_file=filename)
         cfg.add_edge(parent, current_node)
         callee_node = None
         # Find the callee node and add an edge to it
@@ -91,7 +92,7 @@ def construct_cfg(cfg, node, parent=None):
                 break
         if callee_node is None:
             callee_node = ASTNode(
-                 "Not_Exist_" + node.name, node_value=node.name, node_lineno=node.lineno)
+                 "Not_Exist_" + node.name, node_value=node.name, node_lineno=node.lineno, node_file=filename)
         cfg.add_edge(current_node, callee_node)
 
     # Special case for Class
@@ -99,7 +100,7 @@ def construct_cfg(cfg, node, parent=None):
         # Build and add the node to the CFG
         node_value = node.name if hasattr(node, 'name') else None
         current_node = ASTNode(
-            node_type, node_value=node_value, node_lineno=node.lineno)
+            node_type, node_value=node_value, node_lineno=node.lineno, node_file=filename)
         cfg.add_node(current_node)
 
         # The class node is the parent of its method
@@ -113,7 +114,7 @@ def construct_cfg(cfg, node, parent=None):
         # Build and add the node to the CFG
         node_value = node.name if hasattr(node, 'name') else None
         current_node = ASTNode(
-            node_type, node_value=node_value, node_lineno=node.lineno)
+            node_type, node_value=node_value, node_lineno=node.lineno, node_file=filename)
         cfg.add_edge(parent, current_node)
 
         # The function node is the parent of its callee
@@ -125,7 +126,7 @@ def construct_cfg(cfg, node, parent=None):
     # Special case for MethodCall or StaticMethodCall
     elif node_type == "MethodCall" or node_type == "StaticMethodCall":
         # Build and add the node to the CFG
-        current_node = ASTNode(node_type, node_lineno=node.lineno)
+        current_node = ASTNode(node_type, node_lineno=node.lineno, node_file=filename)
         cfg.add_edge(parent, current_node)
         callee_node = None
         # Find the callee node and add an edge to it
@@ -135,10 +136,20 @@ def construct_cfg(cfg, node, parent=None):
                 break
         if callee_node is None:
                 callee_node = ASTNode(
-                    "Function_Not_Exist", node_value=node.name, node_lineno=node.lineno)
+                    "Function_Not_Exist", node_value=node.name, node_lineno=node.lineno, node_file=filename)
         cfg.add_edge(current_node, callee_node)
 
-# TODO Special case for File Include
+    # Special case for File Include/Require
+    elif node_type in ["Include", "Require"]:
+        included_files = [n.node_value for n in cfg.nodes if n.node_type in ["Include", "Require"]]
+        if node.expr not in included_files:
+            # Build and add the node to the CFG
+            current_node = ASTNode(node_type, node_value=node.expr, node_lineno=node.lineno, node_file=filename)
+            cfg.add_edge(parent, current_node)
+            parsed = parse_php_file(node.expr)
+            for node in parsed:
+                construct_cfg(cfg, node, parent=current_node)
+        
 
 def node_printer(node):
     """
@@ -146,6 +157,7 @@ def node_printer(node):
 
     :param node: The node to be printed.
     """
+    print(node)
     for i in node.fields:
         print(i, '\t', node.__getattribute__(i))
     print('-----------------')
@@ -155,16 +167,16 @@ if __name__ == '__main__':
     # Initialize the CFG and add the start node
     cfg = nx.DiGraph()
     start_node = ASTNode("Start", node_lineno=0)
-
+    filename = 'test/file_include_1.php'
     # Parse the PHP file and construct the CFG
-    parsed = parse_php_file('test/complex.php')
+    parsed = parse_php_file(filename)
     print(len(parsed))
     for node in parsed:
-        construct_cfg(cfg, node, parent=start_node)
+        construct_cfg(cfg, node, parent=start_node, filename=filename)
 
     # Draw the CFG
     print(cfg)
-    labels = {node: ": ".join([node.node_type, str(node.node_lineno)])
+    labels = {node: ": ".join([str(node.node_file), str(node.node_lineno), node.node_type, ])
               for node in cfg.nodes}
     color_map = {
         "If": "red",
