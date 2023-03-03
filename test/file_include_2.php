@@ -15,7 +15,7 @@ $obj = new Class_If();
 $obj->run_if();
 
 // 包含另一个文件
-include 'test/file_include_1.php';
+include_once 'test/file_include_1.php';
 
 // 实例化另一个文件中的类并调用方法
 $obj_while = new Class_While();
