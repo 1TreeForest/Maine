@@ -1,0 +1,7 @@
+node_file,node_lineno,node_type,node_distance
+/home/fuzz/Desktop/Projects/Maine/test/class.php,4,Class,1
+/home/fuzz/Desktop/Projects/Maine/test/class.php,5,Method,inf
+/home/fuzz/Desktop/Projects/Maine/test/class.php,9,Method,0
+Start,0,Start,2
+/home/fuzz/Desktop/Projects/Maine/test/class.php,18,StaticMethodCall,inf
+/home/fuzz/Desktop/Projects/Maine/test/class.php,21,MethodCall,1

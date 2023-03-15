@@ -7,6 +7,7 @@ from collections import deque
 import random
 import argparse
 import os
+import csv
 
 
 def parse_php_file(file_path):
@@ -56,7 +57,8 @@ def construct_cfg(cfg, node, parent=None, file_path=None):
         # Special case for If statements
         if node_type == 'If':
             for ei in node.elseifs:
-                construct_cfg(cfg, ei, parent=current_node, file_path=file_path)
+                construct_cfg(cfg, ei, parent=current_node,
+                              file_path=file_path)
             if node.else_ is not None:
                 construct_cfg(cfg, node.else_,
                               parent=current_node, file_path=file_path)
@@ -159,7 +161,8 @@ def construct_cfg(cfg, node, parent=None, file_path=None):
             parsed = parse_php_file(real_file_path)
             for n in parsed:
                 # The file of each n is the included file
-                construct_cfg(cfg, n, parent=current_node, file_path=real_file_path)
+                construct_cfg(cfg, n, parent=current_node,
+                              file_path=real_file_path)
 
     # Special case for UseDeclarations TODO: Not finished yet, but should we process use statements? Is it necessary?
     # elif node_type == 'UseDeclarations':
@@ -180,6 +183,7 @@ def construct_cfg(cfg, node, parent=None, file_path=None):
     #             i += 1
 
 
+# Calculate the distance of each node from the target node using BFS
 def calculate_distances(cfg):
     target_node = None
     for node in cfg.nodes():
@@ -198,11 +202,13 @@ def calculate_distances(cfg):
         visited.add(current_node)
         for neighbor in cfg.predecessors(current_node):
             if neighbor not in visited:
-                distances[neighbor] = min(distances[neighbor], distances[current_node] + 1)
+                distances[neighbor] = min(
+                    distances[neighbor], distances[current_node] + 1)
                 queue.append(neighbor)
 
     for node, distance in distances.items():
         node.node_distance = distance
+
 
 def node_printer(node):
     '''
@@ -210,51 +216,79 @@ def node_printer(node):
 
     :param node: The node to be printed.
     '''
-    print(node)
-    for i in node.fields:
-        print(i, '\t', node.__getattribute__(i))
-    print('-----------------')
+    # print(node)
+    # for i in node.fields:
+    #     print(i, '\t', node.__getattribute__(i))
+    # print('-----------------')
+
+
+def save_to_csv(nodes, file_name):
+    '''
+    Save the nodes to a CSV file.
+
+    :param nodes: The nodes.
+    :param file_name: The name of the CSV file.
+    '''
+
+    with open('info/distance/' + file_name + '.csv', 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(['node_file', 'node_lineno',
+                        'node_type', 'node_distance'])
+        for node in nodes:
+            writer.writerow([node.node_file, node.node_lineno, node.node_type, node.node_distance])
 
 
 if __name__ == '__main__':
     # set a parser to process the arguments from the command line
     parser = argparse.ArgumentParser()
-    parser.add_argument('-e', '--entry', type=str, required=False, help="Path to the entry function")
-    parser.add_argument('-t', '--target', type=str, required=False, help="The string of the target function (format: path:line_number, e.g., ./file3.php:10)")
-    
+    parser.add_argument('-E', '--entry', type=str,
+                        required=False, help="Path to the entry function")
+    parser.add_argument('-T', '--target', type=str, required=False,
+                        help="The string of the target function (format: path:line_number, e.g., ./file3.php:8)")
+
     entry_path = parser.parse_args().entry
     target = parser.parse_args().target
-    
+
     # Initialize the CFG and add the start node
     cfg = nx.DiGraph()
     start_node = ASTNode('Start', node_lineno=0, node_file='Start')
-    
+
     # Default args for test and debug
     if entry_path is None:
         entry_path = 'test/simple_webserver/index.php'
     if target is None:
-        target = 'file3.php:10'
+        target = 'test/simple_webserver/file3.php:8'
 
-    # Get the absolute path of the entry function
+    # Get the absolute path of the entry function and the target
     entry_path = os.path.abspath(entry_path)
-    
+    target = os.path.abspath(target.split(':')[0]) + ':' + target.split(':')[1]
+
     # Parse the PHP file and construct the CFG
     parsed = parse_php_file(entry_path)
-    print(len(parsed))
     for node in parsed:
         construct_cfg(cfg, node, parent=start_node, file_path=entry_path)
-        
-    # Random add the target node ti test since the args are not defined yet
-    node_list = list(cfg.nodes())
-    target_node = random.choice(node_list)
-    
+
     # Add the target node to the CFG
+    target_node = None
+    closest_node = None
+    smallest_distance = float('inf')
+    target_file, target_lineno = target.split(':')
     for node in cfg.nodes():
-        if ':'.join([str(node.node_file), str(node.node_lineno)]) == target:
-            target_node = node
-            break
-    target_node.is_target = True
-    
+        if node.node_file == target_file:
+            interval = int(target_lineno) - node.node_lineno
+            if interval == 0:
+                target_node = node
+                break
+            elif interval > 0 and interval < smallest_distance:
+                closest_node = node
+                smallest_distance = interval
+    if target_node is None:
+        target_node = closest_node
+        try:
+            target_node.is_target = True
+        except:
+            raise Exception('Target node not found! Please check the target path and line number.')
+
     # Calculate distances from target node to each node
     calculate_distances(cfg)
 
@@ -284,8 +318,11 @@ if __name__ == '__main__':
     pos = nx.arf_layout(cfg)
     fig = plt.figure(figsize=(10, 10))
     nx.draw(cfg, pos=pos, with_labels=True, labels=labels, node_color=[
-            color_map.get(node.node_type, 'blue') for node in cfg.nodes])
+            color_map.get(node.node_type, 'blue') for node in cfg.nodes], font_size=8)
     plt.show()
-    
+
     # Write the CFG to a graphml file for further processing
-    nx.write_graphml(cfg, 'code/info/test.graphml')
+    nx.write_graphml(cfg, r'info/graphml/' +
+                     entry_path.split(r'/')[-1] + '.graphml')
+    # Write the nodes to a CSV file for further processing
+    save_to_csv(cfg.nodes(), entry_path.split(r'/')[-1])
