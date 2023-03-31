@@ -16,13 +16,9 @@ function getCoverage() {
 
     echo 'Coverage data saved to /var/www/html/tmp/coverage/' . $filename . PHP_EOL;
 
-    var_dump($coverage);
-
     $current_dir = getcwd();
     echo $current_dir;
 }
 
 register_shutdown_function('getCoverage');
-$current_dir = getcwd();
-echo $current_dir;
 ?>
