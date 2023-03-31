@@ -8,6 +8,7 @@ import random
 import argparse
 import os
 import csv
+from time import sleep
 
 
 def parse_php_file(file_path):
@@ -67,9 +68,8 @@ def construct_cfg(cfg, node, parent=None, file_path=None):
     elif node_type == 'Block':
         # If there is a child that is a control flow statement
         for n in node.nodes:
-            if n.__class__.__name__ in cfs:
-                # The parent of the child is the current node's parent
-                construct_cfg(cfg, n, parent=parent, file_path=file_path)
+            # The parent of the child is the current node's parent
+            construct_cfg(cfg, n, parent=parent, file_path=file_path)
 
     # Special case for Function
     elif node_type == 'Function':
@@ -93,14 +93,13 @@ def construct_cfg(cfg, node, parent=None, file_path=None):
         cfg.add_edge(parent, current_node)
         callee_node = None
         # Find the callee node and add an edge to it
-        for n in cfg.nodes:
-            if n.node_value == node.name:
-                callee_node = n
-                break
-        if callee_node is None:
+        possible_childs = [n for n in cfg.nodes if n.node_value == node.name]
+        if possible_childs == []:
             callee_node = ASTNode(
                 'Not_Exist_' + node.name, node_value=node.name, node_lineno=node.lineno, node_file=file_path)
-        cfg.add_edge(current_node, callee_node)
+        else:
+            for pc in possible_childs:
+                cfg.add_edge(current_node, pc)
 
     # Special case for Class
     elif node_type == 'Class':
@@ -138,31 +137,42 @@ def construct_cfg(cfg, node, parent=None, file_path=None):
         cfg.add_edge(parent, current_node)
         callee_node = None
         # Find the callee node and add an edge to it
-        for n in cfg.nodes:
-            if n.node_value == node.name:
-                callee_node = n
-                break
-        if callee_node is None:
+        possible_childs = [n for n in cfg.nodes if n.node_value == node.name]
+        if possible_childs == []:
             callee_node = ASTNode(
-                'Function_Not_Exist', node_value=node.name, node_lineno=node.lineno, node_file=file_path)
-        cfg.add_edge(current_node, callee_node)
-
+                'Not_Exist_' + node.name, node_value=node.name, node_lineno=node.lineno, node_file=file_path)
+        else:
+            for pc in possible_childs:
+                cfg.add_edge(current_node, pc)
+                
     # Special case for File Include/Require
     elif node_type in ['Include', 'Require']:
-        included_files = [
-            n.node_value for n in cfg.nodes if n.node_type in ['Include', 'Require']]
-        if node.expr not in included_files:
-            # Build and add the node to the CFG
-            current_node = ASTNode(
+        for suspecious_node in cfg.nodes:
+            if suspecious_node.node_value == node.expr and suspecious_node.node_type in ['Include', 'Require']:
+            # The included file is already in the CFG
+            # Find the nodes linked with piror Include_Node and add edges to them
+                current_node = ASTNode(
                 node_type, node_value=node.expr, node_lineno=node.lineno, node_file=file_path)
-            cfg.add_edge(parent, current_node)
-            file_path_list = file_path.split('/')
-            real_file_path = '/'.join(file_path_list[:-1]) + '/' + node.expr
-            parsed = parse_php_file(real_file_path)
-            for n in parsed:
-                # The file of each n is the included file
-                construct_cfg(cfg, n, parent=current_node,
-                              file_path=real_file_path)
+                cfg.add_edge(parent, current_node)
+                out_edges = cfg.out_edges(suspecious_node)
+                print()
+                print(suspecious_node, suspecious_node.node_value, suspecious_node.node_type)
+                for piror_include_node, child in out_edges:
+                    print(child, '*' * 10)
+                    cfg.add_edge(current_node, child)
+                return
+        # The included file is not in the CFG
+        # Build and add the node to the CFG, also process the included file
+        current_node = ASTNode(
+            node_type, node_value=node.expr, node_lineno=node.lineno, node_file=file_path)
+        cfg.add_edge(parent, current_node)
+        file_path_list = file_path.split('/')
+        real_file_path = '/'.join(file_path_list[:-1]) + '/' + node.expr
+        parsed = parse_php_file(real_file_path)
+        for n in parsed:
+            # The file of each n is the included file
+            construct_cfg(cfg, n, parent=current_node,
+                            file_path=real_file_path)
 
     # Special case for UseDeclarations TODO: Not finished yet, but should we process use statements? Is it necessary?
     # elif node_type == 'UseDeclarations':
@@ -190,7 +200,7 @@ def calculate_distances(cfg):
         if node.is_target:
             target_node = node
             break
-
+    
     distances = {node: float('inf') for node in cfg.nodes()}
     distances[target_node] = 0
 
@@ -216,10 +226,10 @@ def node_printer(node):
 
     :param node: The node to be printed.
     '''
-    # print(node)
-    # for i in node.fields:
-    #     print(i, '\t', node.__getattribute__(i))
-    # print('-----------------')
+    print(node)
+    for i in node.fields:
+        print(i, '\t', node.__getattribute__(i))
+    print('-----------------')
 
 
 def save_to_csv(nodes, file_name):
@@ -242,7 +252,7 @@ if __name__ == '__main__':
     # set a parser to process the arguments from the command line
     parser = argparse.ArgumentParser()
     parser.add_argument('-E', '--entry', type=str,
-                        required=False, help="Path to the entry function")
+                        required=False, help="Path to the entry file")
     parser.add_argument('-T', '--target', type=str, required=False,
                         help="The string of the target function (format: path:line_number, e.g., ./file3.php:8)")
 
@@ -284,10 +294,11 @@ if __name__ == '__main__':
                 smallest_distance = interval
     if target_node is None:
         target_node = closest_node
-        try:
-            target_node.is_target = True
-        except:
-            raise Exception('Target node not found! Please check the target path and line number.')
+        
+    try:
+        target_node.is_target = True
+    except:
+        raise Exception('Target node not found! Please check the target path and line number.')
 
     # Calculate distances from target node to each node
     calculate_distances(cfg)
@@ -314,6 +325,8 @@ if __name__ == '__main__':
         'Method': 'teal',
         'MethodCall': 'coral',
         'StaticMethodCall': 'gold',
+        'Include': 'silver',
+        'Require': 'silver'
     }
     pos = nx.arf_layout(cfg)
     fig = plt.figure(figsize=(10, 10))
