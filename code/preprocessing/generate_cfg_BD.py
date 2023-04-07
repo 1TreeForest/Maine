@@ -35,12 +35,12 @@ def construct_cfg(cfg, node, parent=None, file_path=None):
     :param parent: The parent of the current node.
     :param file_path: The absulate path of the current node.
     '''
-    node_printer(node)
+    # node_printer(node)
     cfs = ['If', 'ElseIf', 'Else', 'While', 'DoWhile', 'For',
-           'Foreach', 'Switch', 'Case', 'Default']
+           'Foreach', 'Switch', 'Case', 'Default', 'InlineHTML']
     node_type = node.__class__.__name__
 
-    # Add control flow statements to the CFG
+    # Add control flow statements to the CFG (InlineHTML to avoid nosence accessable code blocks)
     if node_type in cfs:
         # Build and add the node to the CFG
         node_value = node.expr if hasattr(node, 'expr') else None
@@ -156,10 +156,7 @@ def construct_cfg(cfg, node, parent=None, file_path=None):
                 node_type, node_value=node.expr, node_lineno=node.lineno, node_file=file_path)
                 cfg.add_edge(parent, current_node)
                 out_edges = cfg.out_edges(suspecious_node)
-                print()
-                print(suspecious_node, suspecious_node.node_value, suspecious_node.node_type)
                 for piror_include_node, child in out_edges:
-                    print(child, '*' * 10)
                     cfg.add_edge(current_node, child)
                 return
         # The included file is not in the CFG

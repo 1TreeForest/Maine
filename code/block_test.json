@@ -1,27 +1,126 @@
+// distance
+{'nodes': [
+        {'node_file': 'Start', 'node_lineno': 0, 'node_type': 'Start', 'node_distance': 9
+        },
+        {'node_file': '/var/www/html/index.php', 'node_lineno': 2, 'node_type': 'Require', 'node_distance': inf
+        },
+        {'node_file': '/var/www/html/coverage.php', 'node_lineno': 4, 'node_type': 'FunctionCall', 'node_distance': inf
+        },
+        {'node_file': '/var/www/html/coverage.php', 'node_lineno': 7, 'node_type': 'Function', 'node_distance': inf
+        },
+        {'node_file': '/var/www/html/coverage.php', 'node_lineno': 8, 'node_type': 'FunctionCall', 'node_distance': inf
+        },
+        {'node_file': '/var/www/html/coverage.php', 'node_lineno': 31, 'node_type': 'FunctionCall', 'node_distance': inf
+        },
+        {'node_file': '/var/www/html/coverage.php', 'node_lineno': 39, 'node_type': 'FunctionCall', 'node_distance': inf
+        },
+        {'node_file': '/var/www/html/index.php', 'node_lineno': 3, 'node_type': 'Include', 'node_distance': inf
+        },
+        {'node_file': '/var/www/html/file1.php', 'node_lineno': 2, 'node_type': 'Require', 'node_distance': inf
+        },
+        {'node_file': '/var/www/html/file1.php', 'node_lineno': 3, 'node_type': 'Class', 'node_distance': inf
+        },
+        {'node_file': '/var/www/html/file1.php', 'node_lineno': 4, 'node_type': 'Method', 'node_distance': inf
+        },
+        {'node_file': '/var/www/html/file1.php', 'node_lineno': 8, 'node_type': 'MethodCall', 'node_distance': inf
+        },
+        {'node_file': '/var/www/html/index.php', 'node_lineno': 4, 'node_type': 'Include', 'node_distance': inf
+        },
+        {'node_file': '/var/www/html/file2.php', 'node_lineno': 2, 'node_type': 'Require', 'node_distance': inf
+        },
+        {'node_file': '/var/www/html/file2.php', 'node_lineno': 3, 'node_type': 'Class', 'node_distance': inf
+        },
+        {'node_file': '/var/www/html/file2.php', 'node_lineno': 4, 'node_type': 'Method', 'node_distance': inf
+        },
+        {'node_file': '/var/www/html/index.php', 'node_lineno': 5, 'node_type': 'Include', 'node_distance': inf
+        },
+        {'node_file': '/var/www/html/file3.php', 'node_lineno': 2, 'node_type': 'Require', 'node_distance': inf
+        },
+        {'node_file': '/var/www/html/file3.php', 'node_lineno': 3, 'node_type': 'Class', 'node_distance': 2
+        },
+        {'node_file': '/var/www/html/file3.php', 'node_lineno': 4, 'node_type': 'Method', 'node_distance': 1
+        },
+        {'node_file': '/var/www/html/file3.php', 'node_lineno': 8, 'node_type': 'If', 'node_distance': 0
+        },
+        {'node_file': '/var/www/html/file3.php', 'node_lineno': 11, 'node_type': 'Else', 'node_distance': inf
+        },
+        {'node_file': '/var/www/html/index.php', 'node_lineno': 6, 'node_type': 'If', 'node_distance': 8
+        },
+        {'node_file': '/var/www/html/index.php', 'node_lineno': 8, 'node_type': 'If', 'node_distance': 7
+        },
+        {'node_file': '/var/www/html/index.php', 'node_lineno': 11, 'node_type': 'MethodCall', 'node_distance': inf
+        },
+        {'node_file': '/var/www/html/index.php', 'node_lineno': 13, 'node_type': 'Else', 'node_distance': 6
+        },
+        {'node_file': '/var/www/html/index.php', 'node_lineno': 13, 'node_type': 'If', 'node_distance': 5
+        },
+        {'node_file': '/var/www/html/index.php', 'node_lineno': 16, 'node_type': 'MethodCall', 'node_distance': inf
+        },
+        {'node_file': '/var/www/html/index.php', 'node_lineno': 18, 'node_type': 'Else', 'node_distance': 4
+        },
+        {'node_file': '/var/www/html/index.php', 'node_lineno': 18, 'node_type': 'If', 'node_distance': 3
+        },
+        {'node_file': '/var/www/html/index.php', 'node_lineno': 22, 'node_type': 'MethodCall', 'node_distance': 2
+        }
+    ]
+}
 // coverage
-{'test_input': {'seed_id': '2'
-    }, 'coverage': {'/var/www/html/coverage.php': {'8': 1, '10': 1, '39': 1, '41': 1
-        }, '/var/www/html/index.php': {'3': 1, '4': 1, '5': 1, '6': 1, '7': 1, '8': 1, '13': 1, '18': 1, '19': 1, '20': 1, '21': 1, '22': 1, '26': 1, '37': 1
-        }, '/var/www/html/file2.php': {'2': 1, '10': 1
-        }, '/var/www/html/file3.php': {'2': 1, '5': 1, '6': 1, '8': 1, '9': 1, '14': 1, '17': 1
-        }, '/var/www/html/file1.php': {'2': 1, '12': 1
+{
+    "test_input": {
+        "seed_id": null
+    },
+    "coverage": {
+        "\/var\/www\/html\/coverage.php": {
+            "8": 1,
+            "10": 1,
+            "39": 1,
+            "41": 1
+        },
+        "\/var\/www\/html\/index.php": {
+            "3": 1,
+            "4": 1,
+            "5": 1,
+            "6": 1,
+            "7": 1,
+            "8": 1,
+            "13": 1,
+            "14": 1,
+            "15": 1,
+            "16": 1,
+            "26": 1,
+            "37": 1
+        },
+        "\/var\/www\/html\/file2.php": {
+            "2": 1,
+            "5": 1,
+            "6": 1,
+            "7": 1,
+            "10": 1
+        },
+        "\/var\/www\/html\/file3.php": {
+            "2": 1,
+            "17": 1
+        },
+        "\/var\/www\/html\/file1.php": {
+            "2": 1,
+            "12": 1
         }
     }
 }
 // block_map
-{'Start': {'0': '5'
-    }, '/var/www/html/index.php': {'2': 'inf', '3': 'inf', '4': 'inf', '5': 'inf', '6': '4', '8': '3', '11': '2', '13': '3', '16': '2', '18': '3', '22': '2'
-    }, '/var/www/html/coverage.php': {'4': 'inf', '7': 'inf', '8': 'inf', '31': 'inf', '39': 'inf'
-    }, '/var/www/html/file1.php': {'2': 'inf', '3': 'inf', '4': 'inf', '8': 'inf'
-    }, '/var/www/html/file2.php': {'2': 'inf', '3': 'inf', '4': 'inf'
-    }, '/var/www/html/file3.php': {'2': 'inf', '3': '2', '4': '1', '8': '0', '11': 'inf'
+{'Start': {'0': 9
+    }, '/var/www/html/index.php': {'2': inf, '3': inf, '4': inf, '5': inf, '6': 8, '8': 7, '11': inf, '13': 5, '16': inf, '18': 3, '22': 2
+    }, '/var/www/html/coverage.php': {'4': inf, '7': inf, '8': inf, '31': inf, '39': inf
+    }, '/var/www/html/file1.php': {'2': inf, '3': inf, '4': inf, '8': inf
+    }, '/var/www/html/file2.php': {'2': inf, '3': inf, '4': inf
+    }, '/var/www/html/file3.php': {'2': inf, '3': 2, '4': 1, '8': 0, '11': inf
     }
 }
 // covered_block_distance
-{'/var/www/html/coverage.php': {'8': 'inf', '10': 'inf', '39': 'inf', '41': 'inf'
-    }, '/var/www/html/index.php': {'3': 'inf', '4': 'inf', '5': 'inf', '6': '4', '7': '4', '8': '3', '13': '3', '18': '3', '19': '3', '20': '3', '21': '3', '22': '2', '26': '2', '37': '2'
-    }, '/var/www/html/file2.php': {'2': 'inf', '10': 'inf'
-    }, '/var/www/html/file3.php': {'2': 'inf', '5': '1', '6': '1', '8': '0', '9': '0', '14': 'inf', '17': 'inf'
-    }, '/var/www/html/file1.php': {'2': 'inf', '12': 'inf'
+{'/var/www/html/coverage.php': {'8': inf, '10': inf, '39': inf, '41': inf
+    }, '/var/www/html/index.php': {'3': inf, '4': inf, '5': inf, '6': 8, '7': 8, '8': 7, '13': 5, '14': 5, '15': 5, '16': inf, '26': 2, '37': 2
+    }, '/var/www/html/file2.php': {'2': inf, '5': inf, '6': inf, '7': inf, '10': inf
+    }, '/var/www/html/file3.php': {'2': inf, '17': inf
+    }, '/var/www/html/file1.php': {'2': inf, '12': inf
     }
 }

@@ -43,7 +43,7 @@ class CoverageProcesser():
                 self.code_block_map[node_file] = {}
             self.code_block_map[node_file][node_lineno] = node_distance
             
-    def calculate_block_distance(self):
+    def calculate_block_distance(self, choice="smallest"):
         covered_block_and_distance = {}
         covers = self.get_coverage()
         for node_file, node_lines in covers['coverage'].items():
@@ -65,9 +65,25 @@ class CoverageProcesser():
                     
                 covered_block_and_distance[node_file][lineno] = distance
 
-        return covered_block_and_distance
+        if choice == "smallest":
+            smallest_distance = float('inf')
+            for node_file, node_lines in covered_block_and_distance.items():
+                for lineno, distance in node_lines.items():
+                    if float(distance) < float(smallest_distance):
+                        smallest_distance = distance
+            return {"seed_id": covers['test_input']["seed_id"], "input_distance": smallest_distance}
+        elif choice == "average":
+            total_distance = 0
+            total_lines = 0
+            for node_file, node_lines in covered_block_and_distance.items():
+                for lineno, distance in node_lines.items():
+                    total_distance += float(distance) if float(distance) != float('inf') else 0
+                    total_lines += 1
+            return {"seed_id": covers['test_input']["seed_id"], "input_distance": total_distance / total_lines}
+        else:
+            raise ValueError("Invalid choice for calculating input_distance.")
     
 if __name__ == "__main__":
     test = CoverageProcesser()
     test.build_code_block_map()
-    print(test.code_block_map)
+    print(test.calculate_block_distance())
