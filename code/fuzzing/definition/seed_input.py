@@ -19,6 +19,8 @@ class SeedInput:
         self.parent_id = parent_id
         self.parameters = parameters
         self.headers = headers
+        self.smallest_distance = float("inf")
+        self.average_distance = float("inf")
 
     def __str__(self):
         return f"SeedInput(id={self.id}, url={self.url}, method={self.method}, usage_count={self.usage_count}, parent_id={self.parent_id}, num_children={self.num_children}, parameters={self.parameters}, headers={self.headers})"

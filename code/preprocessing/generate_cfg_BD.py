@@ -7,8 +7,9 @@ from collections import deque
 import random
 import argparse
 import os
-import csv
 from time import sleep
+import csv
+import json
 
 
 def parse_php_file(file_path):
@@ -246,6 +247,24 @@ def save_to_csv(nodes, file_name):
                         'node_type', 'node_distance'])
         for node in nodes:
             writer.writerow([node.node_file, node.node_lineno, node.node_type, node.node_distance])
+            
+def save_to_json(nodes, file_name):
+    '''
+    Save the nodes to a JSON file.
+
+    :param nodes: The nodes.
+    :param file_name: The name of the JSON file.
+    '''
+    data = {'nodes': []}
+    for node in nodes:
+        data['nodes'].append({
+            'node_file': node.node_file,
+            'node_lineno': node.node_lineno,
+            'node_type': node.node_type,
+            'node_distance': node.node_distance
+        })
+    with open('info/distance/' + file_name + '.json', 'w') as jsonfile:
+        json.dump(data, jsonfile, indent=4)
 
 
 if __name__ == '__main__':
@@ -265,9 +284,9 @@ if __name__ == '__main__':
 
     # Default args for test and debug
     if entry_path is None:
-        entry_path = 'test/simple_webserver/index.php'
+        entry_path = '/var/www/html/index.php'
     if target is None:
-        target = 'test/simple_webserver/file3.php:8'
+        target = '/var/www/html/file3.php:9'
 
     # Get the absolute path of the entry function and the target
     entry_path = os.path.abspath(entry_path)
@@ -338,4 +357,4 @@ if __name__ == '__main__':
     nx.write_graphml(cfg, r'info/graphml/' +
                      entry_path.split(r'/')[-1] + '.graphml')
     # Write the nodes to a CSV file for further processing
-    save_to_csv(cfg.nodes(), entry_path.split(r'/')[-1])
+    save_to_json(cfg.nodes(), entry_path.split(r'/')[-1])

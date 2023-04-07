@@ -1,0 +1,190 @@
+{
+    "nodes": [
+        {
+            "node_file": "Start",
+            "node_lineno": 0,
+            "node_type": "Start",
+            "node_distance": "5"
+        },
+        {
+            "node_file": "/var/www/html/index.php",
+            "node_lineno": 2,
+            "node_type": "Require",
+            "node_distance": "inf"
+        },
+        {
+            "node_file": "/var/www/html/coverage.php",
+            "node_lineno": 4,
+            "node_type": "FunctionCall",
+            "node_distance": "inf"
+        },
+        {
+            "node_file": "/var/www/html/coverage.php",
+            "node_lineno": 7,
+            "node_type": "Function",
+            "node_distance": "inf"
+        },
+        {
+            "node_file": "/var/www/html/coverage.php",
+            "node_lineno": 8,
+            "node_type": "FunctionCall",
+            "node_distance": "inf"
+        },
+        {
+            "node_file": "/var/www/html/coverage.php",
+            "node_lineno": 31,
+            "node_type": "FunctionCall",
+            "node_distance": "inf"
+        },
+        {
+            "node_file": "/var/www/html/coverage.php",
+            "node_lineno": 39,
+            "node_type": "FunctionCall",
+            "node_distance": "inf"
+        },
+        {
+            "node_file": "/var/www/html/index.php",
+            "node_lineno": 3,
+            "node_type": "Include",
+            "node_distance": "inf"
+        },
+        {
+            "node_file": "/var/www/html/file1.php",
+            "node_lineno": 2,
+            "node_type": "Require",
+            "node_distance": "inf"
+        },
+        {
+            "node_file": "/var/www/html/file1.php",
+            "node_lineno": 3,
+            "node_type": "Class",
+            "node_distance": "inf"
+        },
+        {
+            "node_file": "/var/www/html/file1.php",
+            "node_lineno": 4,
+            "node_type": "Method",
+            "node_distance": "inf"
+        },
+        {
+            "node_file": "/var/www/html/file1.php",
+            "node_lineno": 8,
+            "node_type": "MethodCall",
+            "node_distance": "inf"
+        },
+        {
+            "node_file": "/var/www/html/index.php",
+            "node_lineno": 4,
+            "node_type": "Include",
+            "node_distance": "inf"
+        },
+        {
+            "node_file": "/var/www/html/file2.php",
+            "node_lineno": 2,
+            "node_type": "Require",
+            "node_distance": "inf"
+        },
+        {
+            "node_file": "/var/www/html/file2.php",
+            "node_lineno": 3,
+            "node_type": "Class",
+            "node_distance": "inf"
+        },
+        {
+            "node_file": "/var/www/html/file2.php",
+            "node_lineno": 4,
+            "node_type": "Method",
+            "node_distance": "inf"
+        },
+        {
+            "node_file": "/var/www/html/index.php",
+            "node_lineno": 5,
+            "node_type": "Include",
+            "node_distance": "inf"
+        },
+        {
+            "node_file": "/var/www/html/file3.php",
+            "node_lineno": 2,
+            "node_type": "Require",
+            "node_distance": "inf"
+        },
+        {
+            "node_file": "/var/www/html/file3.php",
+            "node_lineno": 3,
+            "node_type": "Class",
+            "node_distance": "2"
+        },
+        {
+            "node_file": "/var/www/html/file3.php",
+            "node_lineno": 4,
+            "node_type": "Method",
+            "node_distance": "1"
+        },
+        {
+            "node_file": "/var/www/html/file3.php",
+            "node_lineno": 8,
+            "node_type": "If",
+            "node_distance": "0"
+        },
+        {
+            "node_file": "/var/www/html/file3.php",
+            "node_lineno": 11,
+            "node_type": "Else",
+            "node_distance": "inf"
+        },
+        {
+            "node_file": "/var/www/html/index.php",
+            "node_lineno": 6,
+            "node_type": "If",
+            "node_distance": "4"
+        },
+        {
+            "node_file": "/var/www/html/index.php",
+            "node_lineno": 8,
+            "node_type": "If",
+            "node_distance": "3"
+        },
+        {
+            "node_file": "/var/www/html/index.php",
+            "node_lineno": 11,
+            "node_type": "MethodCall",
+            "node_distance": "2"
+        },
+        {
+            "node_file": "/var/www/html/index.php",
+            "node_lineno": 13,
+            "node_type": "Else",
+            "node_distance": "4"
+        },
+        {
+            "node_file": "/var/www/html/index.php",
+            "node_lineno": 13,
+            "node_type": "If",
+            "node_distance": "3"
+        },
+        {
+            "node_file": "/var/www/html/index.php",
+            "node_lineno": 16,
+            "node_type": "MethodCall",
+            "node_distance": "2"
+        },
+        {
+            "node_file": "/var/www/html/index.php",
+            "node_lineno": 18,
+            "node_type": "Else",
+            "node_distance": "4"
+        },
+        {
+            "node_file": "/var/www/html/index.php",
+            "node_lineno": 18,
+            "node_type": "If",
+            "node_distance": "3"
+        },
+        {
+            "node_file": "/var/www/html/index.php",
+            "node_lineno": 22,
+            "node_type": "MethodCall",
+            "node_distance": "2"
+        }
+    ]
+}
