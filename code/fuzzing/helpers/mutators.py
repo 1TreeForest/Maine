@@ -83,7 +83,8 @@ class StringMutator:
 
 class ParameterMutator:
     @staticmethod
-    def generate_random_string(length=10):
+    def generate_random_string(max_length=10):
+        length = random.randint(0, max_length)
         return ''.join(random.choice(string.printable[33:127]) for _ in range(length))
     
     @staticmethod
@@ -97,73 +98,50 @@ class ParameterMutator:
 
     @staticmethod
     def delete_parameter(seed_input):
-        new_params = seed_input.parameters
-        if not new_params:
-            return None
-        del_key = random.choice(list(new_params.keys()))
-        del new_params[del_key]
-        seed_input.increment_usage_count()
-        return SeedInput(url=seed_input.url, parent_id=seed_input.id, method=seed_input.method, parameters=new_params, headers=seed_input.headers)
-    
-    @staticmethod
-    def clear_parameter(seed_input, key):
-        new_params = seed_input.parameters
-        if key not in new_params:
-            return None
-        new_params[key] = ""
+        params_dict = dict(param.split('=') for param in seed_input.parameters.split('&'))
+        if not params_dict:  # 检查参数是否为空
+            return seed_input
+        key_to_delete = random.choice(list(params_dict.keys()))
+        del params_dict[key_to_delete]
+        new_params = '&'.join([f"{k}={v}" for k, v in params_dict.items()])
         seed_input.increment_usage_count()
         return SeedInput(url=seed_input.url, parent_id=seed_input.id, method=seed_input.method, parameters=new_params, headers=seed_input.headers)
 
     @staticmethod
     def replace_key(seed_input):
-        new_params = seed_input.parameters
-        if not new_params:
-            return None
-        old_key = random.choice(list(new_params.keys()))
+        params_dict = dict(param.split('=') for param in seed_input.parameters.split('&'))
+        if not params_dict:  # 检查参数是否为空
+            return seed_input
+        key_to_replace = random.choice(list(params_dict.keys()))
         new_key = ParameterMutator.generate_random_string()
-        new_params[new_key] = new_params.pop(old_key)
+        params_dict[new_key] = params_dict[key_to_replace]
+        del params_dict[key_to_replace]
+        new_params = '&'.join([f"{k}={v}" for k, v in params_dict.items()])
         seed_input.increment_usage_count()
         return SeedInput(url=seed_input.url, parent_id=seed_input.id, method=seed_input.method, parameters=new_params, headers=seed_input.headers)
 
     @staticmethod
     def replace_value(seed_input):
-        new_params = seed_input.parameters
-        if not new_params:
-            return None
-        key = random.choice(list(new_params.keys()))
+        params_dict = dict(param.split('=') for param in seed_input.parameters.split('&'))
+        if not params_dict:  # 检查参数是否为空
+            return seed_input
+        key_to_replace_value = random.choice(list(params_dict.keys()))
         new_value = ParameterMutator.generate_random_string()
-        new_params[key] = new_value
-        seed_input.increment_usage_count()
-        return SeedInput(url=seed_input.url, parent_id=seed_input.id, method=seed_input.method, parameters=new_params, headers=seed_input.headers)
-    
-    @staticmethod
-    def swap_parameters(seed_input):
-        new_params = seed_input.parameters
-        if len(new_params) < 2:
-            return None
-        key_list = list(new_params.keys())
-        random.shuffle(key_list)
-        key1, key2 = key_list[:2]
-        new_params[key1], new_params[key2] = new_params[key2], new_params[key1]
-        seed_input.increment_usage_count()
-        return SeedInput(url=seed_input.url, parent_id=seed_input.id, method=seed_input.method, parameters=new_params, headers=seed_input.headers)
-    
-    @staticmethod
-    def copy_value(seed_input):
-        new_params = seed_input.parameters
-        if not new_params:
-            return None
-        key1, key2 = random.sample(list(new_params.keys()), 2)
-        new_params[key1] = new_params[key2]
+        params_dict[key_to_replace_value] = new_value
+        new_params = '&'.join([f"{k}={v}" for k, v in params_dict.items()])
         seed_input.increment_usage_count()
         return SeedInput(url=seed_input.url, parent_id=seed_input.id, method=seed_input.method, parameters=new_params, headers=seed_input.headers)
 
     @staticmethod
-    def copy_key(seed_input):
-        new_params = seed_input.parameters
-        if not new_params:
-            return None
-        key1, key2 = random.sample(list(new_params.keys()), 2)
-        new_params[key1] = key2
+    def swap_parameters(seed_input):
+        params = seed_input.parameters.split("&")
+        if len(params) < 2:
+            return seed_input
+        idx1, idx2 = random.sample(range(len(params)), 2)
+        key1, value1 = params[idx1].split("=")
+        key2, value2 = params[idx2].split("=")
+        params[idx1] = key1 + "=" + value2
+        params[idx2] = key2 + "=" + value1
+        new_params = "&".join(params)
         seed_input.increment_usage_count()
         return SeedInput(url=seed_input.url, parent_id=seed_input.id, method=seed_input.method, parameters=new_params, headers=seed_input.headers)
