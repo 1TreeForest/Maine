@@ -6,12 +6,13 @@ class TestItem:
     A test input item will be removed if ... TODO
     '''
 
-    # A counter to generate unique id for each test input item
     _id_counter = 0
-
-    def __init__(self, url, parent_id=None, method="", parameters="", headers={}):
-        TestItem._id_counter += 1
-        self.id = TestItem._id_counter
+    def __init__(self, url, parent_id=None, method="", parameters="", headers={}, id=None):
+        if id:
+            self.id = id
+        else:
+            self.id = TestItem._id_counter  
+            TestItem._id_counter += 1
         self.url = url
         self.method = method
         self.usage_count = 0

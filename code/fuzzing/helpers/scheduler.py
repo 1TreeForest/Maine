@@ -12,7 +12,7 @@ import math
 import json
 
 class Scheduler:
-    def __init__(self, seed_input_json_file, mutator_choice="All", attack_type = "login", extra_cooling_rate=0, max_iterations=100, max_worker=1):
+    def __init__(self, seed_input_json_file, mutator_choice="All", attack_type = "login", extra_cooling_rate=0.2, max_iterations=100, max_worker=1):
         self.manager = Manager()
         self.seed_input_dict = self.manager.dict()
         with open(seed_input_json_file, 'r') as f:
@@ -24,7 +24,7 @@ class Scheduler:
                     headers=item.get("headers", {})
                 )
                 self.seed_input_dict[seed_input.id] = seed_input
-                
+        self.id_counter = self.manager.Value('i', len(self.seed_input_dict))
         self.test_input_queue = self.manager.Queue()
         for seed_input in self.seed_input_dict.values():
             self.test_input_queue.put(seed_input)   
@@ -66,11 +66,10 @@ class Scheduler:
     def schedule_worker(self):
         parent_seed_input = self.test_input_queue.get()
         current_solution = TestItem(url=parent_seed_input.url, method=parent_seed_input.method, parameters=parent_seed_input.parameters, headers=parent_seed_input.headers)
-        print(current_solution.id)
         current_energy = self._calculate_energy(current_solution)
         # 初始化为1000 - 0
-        temperature = 1000 / (1 + parent_seed_input.usage_count)
-        print("temperature: ", temperature)
+        temperature = 100 / (1 + parent_seed_input.usage_count)
+        # print("temperature: ", temperature)
         iterations = 0
 
         # 开始退火算法
@@ -111,7 +110,7 @@ class Scheduler:
                 current_solution = new_solution
                 current_energy = new_energy
                 # 如果新解的距离更小，则直接结束退火算法
-                break
+                # break
             elif random.random() < acceptance_probability:
                 current_solution = new_solution
                 current_energy = new_energy
@@ -124,16 +123,19 @@ class Scheduler:
             # 将本次变异后的解加入种子库
             current_solution.parent_id = parent_seed_input.id
             parent_seed_input.num_children += 1
-            print(current_solution.id)
-            print('*' * 10)
+            current_solution.id = self.id_counter.value
+            self.id_counter.value += 1
             self.seed_input_dict[current_solution.id] = current_solution
         
             # 更新parent_seed_input的信息
             parent_seed_input.increment_usage_count()
             self.seed_input_dict[parent_seed_input.id] = parent_seed_input
+        # 如果parent_seed_input的子节点数量大于种子库的20%，则删除该种子，防止污染种子库
+        if parent_seed_input.num_children > len(self.seed_input_dict) * 0.2:
+            self.seed_input_dict.pop(parent_seed_input.id)
+            print("Delete seed: ", parent_seed_input.id)
 
-        # print(self.seed_input_dict)
-        # print(len(self.seed_input_dict), self.test_count)
+        print("Test Count: ", self.test_count.value, "\tDict len: ", len(self.seed_input_dict))
         # 从种子库中随机再选择一个种子加入测试队列
         while True:
             try:
