@@ -1,0 +1,12 @@
+[
+    {
+        "url": "http://localhost/index.php",
+        "method": "GET",
+        "parameters": "param1=value1"
+    },
+    {
+        "url": "http://localhost/index.php",
+        "method": "GET",
+        "parameters": "action=file2&input1=admin&input2=passwor"
+    }
+]

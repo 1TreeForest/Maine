@@ -10,7 +10,7 @@ function getCoverage() {
     $coverage = xdebug_get_code_coverage();
     
     // 获取test_input的信息
-    $seed_id = isset($_REQUEST['seed_id']) ? $_REQUEST['seed_id'] : null;
+    $seed_id = isset($_REQUEST['maine_seed_id']) ? $_REQUEST['maine_seed_id'] : null;
 
     $test_input = array(
         'seed_id' => $seed_id,
