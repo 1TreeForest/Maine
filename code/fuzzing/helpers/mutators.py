@@ -8,7 +8,16 @@ class StringMutator:
     '''
     A class for mutating seed inputs' parameters by performing string-level operations.
     '''
-
+    
+    @staticmethod
+    def _generate_random_char():
+        characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        specials = "!@#$%^&*()_+-=[]{}|;':\",./<>?"
+        if random.random() < 0.8:
+            return random.choice(characters)
+        else:
+            return random.choice(specials)
+    
     @staticmethod
     def add_char(seed_input):
         '''
@@ -116,8 +125,16 @@ class StringMutator:
 class ParameterMutator:
     @staticmethod
     def _generate_random_string(max_length=10):
+        characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        specials = "!@#$%^&*()_+-=[]{}|;':\",./<>?"
         length = random.randint(0, max_length)
-        return ''.join(random.choice(string.printable[33:126]) for _ in range(length))
+        random_string = ''
+        for _ in range(length):
+            if random.random() < 0.8:
+                random_string += random.choice(characters)
+            else:
+                random_string += random.choice(specials)
+        return ''.join(random.choice(characters) for _ in range(length))
     
     @staticmethod
     def add_parameter(seed_input):

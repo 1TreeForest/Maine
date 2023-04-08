@@ -1,7 +1,7 @@
 import requests
 
 class RequestHandler:
-    def __init__(self, attack_type="dos"):
+    def __init__(self, attack_type="login"):
         self.attack_type = attack_type
     
     def send_request(self, seed_input):
@@ -17,11 +17,14 @@ class RequestHandler:
     
     def handle_request(self, seed_input):
         # TODO add more attack types
+        response = self.send_request(seed_input)
         if self.attack_type == "All":
             # simply send back the response
-            return self.send_request(seed_input)
+            return response
         elif self.attack_type == "dos":
-            return self.dos_attack(seed_input)
+            return self.dos_attack_success(response)
+        elif self.attack_type == "login":
+            return self.login_attack_success(response)
 
     
     def dos_attack_success(self, response):
@@ -30,3 +33,10 @@ class RequestHandler:
             return False
         else:
             return True
+    
+    def login_attack_success(self, response):
+        # TODO decide how to dectect success
+        if "Login successful" in response.text:
+            return True
+        else:
+            return False

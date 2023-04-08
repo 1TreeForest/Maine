@@ -7,6 +7,21 @@
     {
         "url": "http://localhost/index.php",
         "method": "GET",
-        "parameters": "action=file2&input1=admin&input2=passwor"
+        "parameters": "action=file3&input1=admin&input2=passwor"
+    },
+    {
+        "url": "http://localhost/index.php",
+        "method": "GET",
+        "parameters": "action=file2&input1=admin&input2=password"
+    },
+    {
+        "url": "http://localhost/index.php",
+        "method": "GET",
+        "parameters": "action="
+    },
+    {
+        "url": "http://localhost/index.php",
+        "method": "GET",
+        "parameters": "input1=admin&input2=password"
     }
 ]
