@@ -283,7 +283,7 @@ if __name__ == '__main__':
     if entry_path is None:
         entry_path = '/var/www/html/index.php'
     if target is None:
-        target = '/var/www/html/file3.php:9'
+        target = '/var/www/html/file4.php:22'
 
     # Get the absolute path of the entry function and the target
     entry_path = os.path.abspath(entry_path)

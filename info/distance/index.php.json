@@ -4,7 +4,7 @@
             "node_file": "Start",
             "node_lineno": 0,
             "node_type": "Start",
-            "node_distance": 9
+            "node_distance": 11
         },
         {
             "node_file": "/var/www/html/index.php",
@@ -112,19 +112,19 @@
             "node_file": "/var/www/html/file3.php",
             "node_lineno": 3,
             "node_type": "Class",
-            "node_distance": 2
+            "node_distance": Infinity
         },
         {
             "node_file": "/var/www/html/file3.php",
             "node_lineno": 4,
             "node_type": "Method",
-            "node_distance": 1
+            "node_distance": Infinity
         },
         {
             "node_file": "/var/www/html/file3.php",
             "node_lineno": 8,
             "node_type": "If",
-            "node_distance": 0
+            "node_distance": Infinity
         },
         {
             "node_file": "/var/www/html/file3.php",
@@ -135,18 +135,84 @@
         {
             "node_file": "/var/www/html/index.php",
             "node_lineno": 6,
+            "node_type": "Include",
+            "node_distance": Infinity
+        },
+        {
+            "node_file": "/var/www/html/file4.php",
+            "node_lineno": 2,
+            "node_type": "Require",
+            "node_distance": Infinity
+        },
+        {
+            "node_file": "/var/www/html/file4.php",
+            "node_lineno": 3,
+            "node_type": "Class",
+            "node_distance": 2
+        },
+        {
+            "node_file": "/var/www/html/file4.php",
+            "node_lineno": 5,
+            "node_type": "Method",
+            "node_distance": 1
+        },
+        {
+            "node_file": "/var/www/html/file4.php",
+            "node_lineno": 13,
             "node_type": "If",
-            "node_distance": 8
+            "node_distance": Infinity
+        },
+        {
+            "node_file": "/var/www/html/file4.php",
+            "node_lineno": 20,
+            "node_type": "If",
+            "node_distance": 0
+        },
+        {
+            "node_file": "/var/www/html/file4.php",
+            "node_lineno": 31,
+            "node_type": "If",
+            "node_distance": Infinity
+        },
+        {
+            "node_file": "/var/www/html/file4.php",
+            "node_lineno": 35,
+            "node_type": "If",
+            "node_distance": Infinity
+        },
+        {
+            "node_file": "/var/www/html/file4.php",
+            "node_lineno": 41,
+            "node_type": "Else",
+            "node_distance": Infinity
+        },
+        {
+            "node_file": "/var/www/html/file4.php",
+            "node_lineno": 44,
+            "node_type": "Else",
+            "node_distance": Infinity
+        },
+        {
+            "node_file": "/var/www/html/file4.php",
+            "node_lineno": 47,
+            "node_type": "MethodCall",
+            "node_distance": Infinity
         },
         {
             "node_file": "/var/www/html/index.php",
-            "node_lineno": 8,
+            "node_lineno": 7,
             "node_type": "If",
-            "node_distance": 7
+            "node_distance": 10
         },
         {
             "node_file": "/var/www/html/index.php",
-            "node_lineno": 11,
+            "node_lineno": 9,
+            "node_type": "If",
+            "node_distance": 9
+        },
+        {
+            "node_file": "/var/www/html/index.php",
+            "node_lineno": 12,
             "node_type": "MethodCall",
             "node_distance": Infinity
         },
@@ -154,13 +220,13 @@
             "node_file": "/var/www/html/index.php",
             "node_lineno": 13,
             "node_type": "Else",
-            "node_distance": 6
+            "node_distance": 8
         },
         {
             "node_file": "/var/www/html/index.php",
             "node_lineno": 13,
             "node_type": "If",
-            "node_distance": 5
+            "node_distance": 7
         },
         {
             "node_file": "/var/www/html/index.php",
@@ -170,25 +236,43 @@
         },
         {
             "node_file": "/var/www/html/index.php",
-            "node_lineno": 18,
+            "node_lineno": 17,
+            "node_type": "Else",
+            "node_distance": 6
+        },
+        {
+            "node_file": "/var/www/html/index.php",
+            "node_lineno": 17,
+            "node_type": "If",
+            "node_distance": 5
+        },
+        {
+            "node_file": "/var/www/html/index.php",
+            "node_lineno": 21,
+            "node_type": "MethodCall",
+            "node_distance": Infinity
+        },
+        {
+            "node_file": "/var/www/html/index.php",
+            "node_lineno": 22,
             "node_type": "Else",
             "node_distance": 4
         },
         {
             "node_file": "/var/www/html/index.php",
-            "node_lineno": 18,
+            "node_lineno": 22,
             "node_type": "If",
             "node_distance": 3
         },
         {
             "node_file": "/var/www/html/index.php",
-            "node_lineno": 22,
+            "node_lineno": 27,
             "node_type": "MethodCall",
             "node_distance": 2
         },
         {
             "node_file": "/var/www/html/index.php",
-            "node_lineno": 26,
+            "node_lineno": 31,
             "node_type": "InlineHTML",
             "node_distance": Infinity
         }

@@ -1,6 +1,7 @@
 <?php
+    require_once 'coverage.php';
     class File3 {
-        function process_input($input1, $input2){
+        function process_input3($input1, $input2){
             $input1 = strip_tags($input1);
             $input2 = strip_tags($input2);
             
@@ -12,4 +13,3 @@
             }
         }
     }
-?>

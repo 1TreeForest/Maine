@@ -1,26 +1,26 @@
 import json
 import os
+import time
 
 class CoverageProcesser():
-    def __init__(self, coverage_dir_path="/var/www/html/tmp/coverage", distance_file_path="/home/fuzz/Desktop/Projects/Maine/info/distance/index.php.json"):
+    def __init__(self, coverage_dir_path, distance_file_path):
         self.coverage_dir_path = coverage_dir_path
         self.distance_file_path = distance_file_path
         self.code_block_map = {}
     
-    def get_coverage(self):
-        coverage_files = os.listdir(self.coverage_dir_path)
-
-        # 没有文件则应该在核心引擎中调整这个部件实例的数量 TODO
-        if not coverage_files:
-            raise FileNotFoundError("No coverage file found.")
-
-        # 找到创建时间最早的文件
-        earliest_file = min(coverage_files, key=lambda x: os.path.getctime(os.path.join(self.coverage_dir_path, x)))
-
-        with open(os.path.join(self.coverage_dir_path, earliest_file), 'r') as f:
-            coverage_json = json.load(f)
-
-        os.remove(os.path.join(self.coverage_dir_path, earliest_file))
+    def get_coverage(self, maine_test_id):
+        filename = str(maine_test_id) + ".json"
+        while True:
+            # 找到创建时间最早的文件并处理
+            coverage_files = os.listdir(self.coverage_dir_path)
+            if filename in coverage_files:
+                with open(os.path.join(self.coverage_dir_path, filename), 'r') as f:
+                    coverage_json = json.load(f)
+                os.remove(os.path.join(self.coverage_dir_path, filename))
+                break
+            # else:
+            #     print(coverage_json["test_input"]["maine_test_id"], maine_test_id, os.getpid())
+            #     time.sleep(2)
 
         return coverage_json
     
@@ -43,11 +43,11 @@ class CoverageProcesser():
                 self.code_block_map[node_file] = {}
             self.code_block_map[node_file][node_lineno] = node_distance
             
-    def calculate_block_distance(self, choice="smallest"):
+    def calculate_block_distance(self, maine_test_id, choice="smallest"):
         covered_block_and_distance = {}
         self.build_code_block_map()
-        covers = self.get_coverage()
-        for node_file, node_lines in covers['coverage'].items():
+        covers = self.get_coverage(maine_test_id)
+        for node_file, node_lines in covers["coverage"].items():
             if node_file not in covered_block_and_distance.keys():
                 covered_block_and_distance[node_file] = {}
 
@@ -73,7 +73,7 @@ class CoverageProcesser():
                     if float(distance) < float(smallest_distance):
                         smallest_distance = distance
                 
-            return {"seed_id": covers['test_input']["seed_id"], "smallest_distance": smallest_distance}
+            return {"maine_test_id": covers['test_input']["maine_test_id"], "smallest_distance": smallest_distance}
         elif choice == "average":
             total_distance = 0
             total_lines = 0
@@ -81,7 +81,7 @@ class CoverageProcesser():
                 for lineno, distance in node_lines.items():
                     total_distance += float(distance) if float(distance) != float('inf') else 0
                     total_lines += 1
-            return {"seed_id": covers['test_input']["seed_id"], "average_distance": total_distance / total_lines}
+            return {"maine_test_id": covers['test_input']["maine_test_id"], "average_distance": total_distance / total_lines}
         else:
             raise ValueError("Invalid choice for calculating input_distance.")
     

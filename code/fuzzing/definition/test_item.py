@@ -7,7 +7,7 @@ class TestItem:
     '''
 
     _id_counter = 0
-    def __init__(self, url, parent_id=None, method="", parameters="", headers={}, id=None):
+    def __init__(self, url, parent_id=None, method="", parameters="", headers={}, id=None, smallest_distance = float("inf"), average_distance = float("inf")):
         if id:
             self.id = id
         else:
@@ -20,8 +20,8 @@ class TestItem:
         self.parent_id = parent_id
         self.parameters = parameters
         self.headers = headers
-        self.smallest_distance = float("inf")
-        self.average_distance = float("inf")
+        self.smallest_distance = smallest_distance
+        self.average_distance = average_distance
 
     def __str__(self):
         return f"TestItem(id={self.id}, url={self.url}, method={self.method}, usage_count={self.usage_count}, num_children={self.num_children}, parent_id={self.parent_id}, parameters={self.parameters}, headers={self.headers}, smallest_distance={self.smallest_distance}, average_distance={self.average_distance})"

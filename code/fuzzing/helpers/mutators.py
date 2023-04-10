@@ -1,25 +1,23 @@
 import sys  
 sys.path.append(r'code/fuzzing')  
 import random
-import string
 from definition.test_item import TestItem
+import re
 
 class StringMutator:
     '''
     A class for mutating seed inputs' parameters by performing string-level operations.
     '''
-    
-    @staticmethod
-    def _generate_random_char():
+
+    def _generate_random_char(self):
         characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
         specials = "!@#$%^&*()_+-=[]{}|;':\",./<>?"
-        if random.random() < 0.8:
+        if random.random() < 0.2:
             return random.choice(characters)
         else:
             return random.choice(specials)
-    
-    @staticmethod
-    def add_char(seed_input):
+
+    def add_char(self, seed_input):
         '''
         Add a random character to a random location in the parameters string of a seed input.
 
@@ -30,18 +28,16 @@ class StringMutator:
             TestItem: The new seed input with mutated parameters.
         '''
         new_params = seed_input.parameters
-        try:
+        new_char = self._generate_random_char()
+        if len(new_params) != 0:
             pos = random.randint(0, len(new_params))
-        except:
-            # 如果提取错误则证明不是和使用这种方法
-            return seed_input
-        new_char = chr(random.randint(33, 126))
-        new_params = new_params[:pos] + new_char + new_params[pos:]
-
+            new_params = new_params[:pos] + new_char + new_params[pos:]
+        else:
+            new_params = new_char
+        
         return TestItem(url=seed_input.url, method=seed_input.method, parameters=new_params, headers=seed_input.headers)
 
-    @staticmethod
-    def delete_char(seed_input):
+    def delete_char(self, seed_input):
         '''
         Delete a random character from the parameters string of a seed input.
 
@@ -52,17 +48,14 @@ class StringMutator:
             TestItem: The new seed input with mutated parameters.
         '''
         new_params = seed_input.parameters
-        try:
-            pos = random.randint(0, len(new_params)-1)
-        except:
-            # 如果提取错误则证明不是和使用这种方法
-            return seed_input
+        if len(new_params) == 0:
+            return None
+        pos = random.randint(0, len(new_params)-1)
         new_params = new_params[:pos] + new_params[pos+1:]
 
         return TestItem(url=seed_input.url, method=seed_input.method, parameters=new_params, headers=seed_input.headers)
 
-    @staticmethod
-    def replace_char(seed_input):
+    def replace_char(self, seed_input):
         '''
         Replace a random character in the parameters string of a seed input with a random character.
 
@@ -73,18 +66,15 @@ class StringMutator:
             TestItem: The new seed input with mutated parameters.
         '''
         new_params = seed_input.parameters
-        try:
-            pos = random.randint(0, len(new_params)-1)
-        except:
-            # 如果提取错误则证明不是和使用这种方法
-            return seed_input
-        new_char = chr(random.randint(33, 126))
+        if len(new_params) == 0:
+            return None
+        pos = random.randint(0, len(new_params)-1)
+        new_char = self._generate_random_char()
         new_params = new_params[:pos] + new_char + new_params[pos+1:]
 
         return TestItem(url=seed_input.url, method=seed_input.method, parameters=new_params, headers=seed_input.headers)
 
-    @staticmethod
-    def swap_chars(seed_input):
+    def swap_chars(self, seed_input):
         '''
         Swap two random characters in the parameters string of a seed input.
 
@@ -95,20 +85,17 @@ class StringMutator:
             TestItem: The new seed input with mutated parameters.
         '''
         new_params = seed_input.parameters
-        try:
-            pos1 = random.randint(0, len(new_params)-1)
-            pos2 = random.randint(0, len(new_params)-1)
-        except:
-            # 如果提取错误则证明不是和使用这种方法
-            return seed_input
+        if len(new_params) < 2:
+            return None
+        pos1 = random.randint(0, len(new_params)-1)
+        pos2 = random.randint(0, len(new_params)-1)
         new_params = list(new_params)
         new_params[pos1], new_params[pos2] = new_params[pos2], new_params[pos1]
         new_params = ''.join(new_params)
 
         return TestItem(url=seed_input.url, method=seed_input.method, parameters=new_params, headers=seed_input.headers)
 
-    @staticmethod
-    def random_mutate(seed_input):
+    def random_mutate(self, seed_input, vul_type="All"):
         '''
         Randomly choose one of the string-level mutation methods to mutate a seed input.
 
@@ -118,95 +105,94 @@ class StringMutator:
         Returns:
             TestItem: The new seed input with mutated parameters.
         '''
-        method = random.choice([StringMutator.add_char, StringMutator.delete_char, StringMutator.replace_char, StringMutator.swap_chars])
+        method = random.choice([
+            self.add_char,
+            self.delete_char,
+            self.replace_char,
+            self.swap_chars
+        ])
 
         return method(seed_input)
 
 class ParameterMutator:
-    @staticmethod
-    def _generate_random_string(max_length=10):
-        characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-        specials = "!@#$%^&*()_+-=[]{}|;':\",./<>?"
+    def __init__(self, vul_type="All"):
+        with open('code/fuzzing/dicts/dict_%s.txt' % vul_type, 'r') as f:
+            self.dict = f.readlines()
+
+    def _generate_random_string(self, max_length=10):
+        characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;':\",./<>?"
         length = random.randint(0, max_length)
-        random_string = ''
-        for _ in range(length):
-            if random.random() < 0.8:
-                random_string += random.choice(characters)
-            else:
-                random_string += random.choice(specials)
         return ''.join(random.choice(characters) for _ in range(length))
-    
-    @staticmethod
-    def add_parameter(seed_input):
+
+    def _generate_string_from_dict_file(self, max_length=10):
+        pass
+
+    def add_parameter(self, seed_input):
         new_params = seed_input.parameters
-        new_key = ParameterMutator._generate_random_string()
-        new_value = ParameterMutator._generate_random_string()
-        new_params += '&' + new_key + '=' + new_value
-
-        return TestItem(url=seed_input.url, method=seed_input.method, parameters=new_params, headers=seed_input.headers)
-
-    @staticmethod
-    def delete_parameter(seed_input):
-        try:
-            params_dict = dict(param.split('=') for param in seed_input.parameters.split('&'))
-        except:
-            # 如果提取错误则证明不是和使用这种方法
-            return seed_input
-        key_to_delete = random.choice(list(params_dict.keys()))
-        del params_dict[key_to_delete]
-        new_params = '&'.join([f"{k}={v}" for k, v in params_dict.items()])
-
-        return TestItem(url=seed_input.url, method=seed_input.method, parameters=new_params, headers=seed_input.headers)
-
-    @staticmethod
-    def replace_key(seed_input):
-        try:
-            params_dict = dict(param.split('=') for param in seed_input.parameters.split('&'))
-        except:
-            # 如果提取错误则证明不是和使用这种方法
-            return seed_input
-        key_to_replace = random.choice(list(params_dict.keys()))
-        new_key = ParameterMutator._generate_random_string()
-        params_dict[new_key] = params_dict[key_to_replace]
-        del params_dict[key_to_replace]
-        new_params = '&'.join([f"{k}={v}" for k, v in params_dict.items()])
-
-        return TestItem(url=seed_input.url, method=seed_input.method, parameters=new_params, headers=seed_input.headers)
-
-    @staticmethod
-    def replace_value(seed_input):
-        try:
-            params_dict = dict(param.split('=') for param in seed_input.parameters.split('&'))
-        except:
-            # 如果提取错误则证明不是和使用这种方法
-            return seed_input
-        key_to_replace_value = random.choice(list(params_dict.keys()))
-        new_value = ParameterMutator._generate_random_string()
-        params_dict[key_to_replace_value] = new_value
-        new_params = '&'.join([f"{k}={v}" for k, v in params_dict.items()])
-
-        return TestItem(url=seed_input.url, method=seed_input.method, parameters=new_params, headers=seed_input.headers)
-
-    @staticmethod
-    def swap_parameters(seed_input):
-        try:
-            params_dict = dict(param.split('=') for param in seed_input.parameters.split('&'))
-            if len(params_dict) < 2:
-                return seed_input
-            idx1, idx2 = random.sample(range(len(params_dict)), 2)
-            key1, value1 = params_dict[idx1].split("=")
-            key2, value2 = params_dict[idx2].split("=")
-            params_dict[idx1] = key1 + "=" + value2
-            params_dict[idx2] = key2 + "=" + value1
-            new_params = "&".join(params_dict)
-        except:
-            # 如果提取错误则证明不是和使用这种方法
-            return seed_input
+        if new_params != "":
+            new_params += '&'
+        new_key = self._generate_random_string()
+        new_value = self._generate_random_string()
         
-        return TestItem(url=seed_input.url, method=seed_input.method, parameters=new_params, headers=seed_input.headers) 
-    
-    @staticmethod
-    def random_mutate(seed_input):
-        method = random.choice([ParameterMutator.add_parameter, ParameterMutator.delete_parameter, ParameterMutator.replace_key, ParameterMutator.replace_value, ParameterMutator.swap_parameters])
+        new_params += new_key + '=' + new_value
 
+        return TestItem(url=seed_input.url, method=seed_input.method, parameters=new_params, headers=seed_input.headers)
+
+    def delete_parameter(self, seed_input):
+        pattern = re.compile(r'(?:(?<=^)|(?<=&))([^&=]+)=([^&]+)')
+        params_list = re.findall(pattern, seed_input.parameters)
+        if not params_list:
+            return None
+        key_to_delete = random.choice(list(range(len(params_list))))
+        del params_list[key_to_delete]
+        new_params = '&'.join([f"{k}={v}" for k, v in params_list])
+
+        return TestItem(url=seed_input.url, method=seed_input.method, parameters=new_params, headers=seed_input.headers)
+
+    def replace_key(self, seed_input):
+        pattern = re.compile(r'(?:(?<=^)|(?<=&))([^&=]+)=([^&]+)')
+        params_list = re.findall(pattern, seed_input.parameters)
+        if not params_list:
+            return None
+        key_to_replace = random.choice(list(range(len(params_list))))
+        new_key = self._generate_random_string()
+        params_list[key_to_replace] = (new_key, params_list[key_to_replace][1])
+        new_params = '&'.join([f"{k}={v}" for k, v in params_list])
+
+        return TestItem(url=seed_input.url, method=seed_input.method, parameters=new_params, headers=seed_input.headers)
+
+    def replace_value(self, seed_input):
+        pattern = re.compile(r'(?:(?<=^)|(?<=&))([^&=]+)=([^&]+)')
+        params_list = re.findall(pattern, seed_input.parameters)
+        if not params_list:
+            return None
+        key_to_replace_value = random.choice(list(range(len(params_list))))
+        new_value = self._generate_random_string()
+        params_list[key_to_replace_value] = (params_list[key_to_replace_value][0], new_value)
+        new_params = '&'.join([f"{k}={v}" for k, v in params_list])
+
+        return TestItem(url=seed_input.url, method=seed_input.method, parameters=new_params, headers=seed_input.headers)
+
+    def swap_parameters(self, seed_input):
+        pattern = re.compile(r'(?:(?<=^)|(?<=&))([^&=]+)=([^&]+)')
+        params_list = re.findall(pattern, seed_input.parameters)
+        if len(params_list) < 2:
+            return None
+        idx1, idx2 = random.sample(range(len(params_list)), 2)
+        _, value1 = params_list[idx1]
+        _, value2 = params_list[idx2]
+        params_list[idx1] = (params_list[idx1][0], value2)
+        params_list[idx2] = (params_list[idx2][0], value1)
+        new_params = "&".join([f"{k}={v}" for k, v in params_list])
+        
+        return TestItem(url=seed_input.url, method=seed_input.method, parameters=new_params, headers=seed_input.headers)
+        
+    def random_mutate(self, seed_input, vul_type="All"):
+        method = random.choice([
+            self.add_parameter,
+            self.delete_parameter,
+            self.replace_key,
+            self.replace_value,
+            self.swap_parameters])
+        
         return method(seed_input)
